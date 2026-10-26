@@ -1,5 +1,6 @@
 // Shared helpers: data loading, color scales, formatters, tooltip.
 // Every chart module imports from here so colors and formats stay consistent.
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 export const LATEST_YEAR = 2018; // last year with CO2 data in this dataset
 

@@ -1,6 +1,7 @@
 // Exploratory 2: median CO2 per capita over time, by World Bank income group.
 // Note: income group is the 2021 classification applied to all years.
 import { INCOME_GROUPS, incomeColor, LATEST_YEAR, frame, drawAxes, legend, tooltip, fmt } from "./common.js";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 export function draw(data) {
   const rows = data.filter((d) => d.co2_pc != null && d.income && d.year <= LATEST_YEAR);

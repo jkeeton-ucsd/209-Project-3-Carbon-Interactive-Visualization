@@ -1,6 +1,7 @@
 // Exploratory 4: GDP per capita vs life expectancy (the "Preston curve").
 // Shows the alternative y-metric we might offer in the final dropdown.
 import { LATEST_YEAR, REGIONS, regionColor, frame, drawAxes, legend, tooltip, countryTip, fmt } from "./common.js";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 export function draw(data) {
   const rows = data.filter((d) => d.year === LATEST_YEAR && d.gdp_pc > 0 && d.life_exp != null);

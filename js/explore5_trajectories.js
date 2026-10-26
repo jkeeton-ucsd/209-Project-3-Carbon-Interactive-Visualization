@@ -2,6 +2,7 @@
 // This is the chart that suggests animating the full scatter over time:
 // rich countries rise then bend back (decoupling); developing ones are still climbing.
 import { LATEST_YEAR, frame, drawAxes, tooltip, countryTip } from "./common.js";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 // Edit this list freely — keep it short so lines stay readable.
 const CODES = ["USA", "GBR", "DEU", "CHN", "IND", "BRA"];

@@ -3,6 +3,7 @@
 //   Interactions: year slider + play, y-metric dropdown, region highlight dropdown, tooltips.
 // Axis domains are fixed across ALL years so motion over time is honest.
 import { LATEST_YEAR, REGIONS, regionColor, frame, legend, tooltip, fmt } from "./common.js";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const METRICS = {
   co2_pc:    { label: "CO₂ per capita (tonnes)",                 log: true,  f: fmt.tons },

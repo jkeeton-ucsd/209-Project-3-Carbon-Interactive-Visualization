@@ -1,5 +1,7 @@
 // Exploratory 1: GDP per capita vs CO2 per capita, one year (static snapshot).
 // Log–log axes because both variables span ~3 orders of magnitude.
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
 import { LATEST_YEAR, REGIONS, regionColor, frame, drawAxes, legend, tooltip, countryTip } from "./common.js";
 
 export function draw(data) {

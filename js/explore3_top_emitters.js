@@ -1,6 +1,7 @@
 // Exploratory 3: top 15 emitters — per person vs. in total. Toggle buttons switch the measure.
 // The two rankings barely overlap, which is the point.
 import { LATEST_YEAR, frame, tooltip, fmt, countryTip } from "./common.js";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const MEASURES = {
   co2_pc: { label: "CO₂ per capita (tonnes)", format: (v) => d3.format(",.1f")(v) },
