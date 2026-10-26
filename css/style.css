@@ -77,7 +77,8 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
 
 /* Chart chrome */
 .chart { width: 100%; }
-.chart svg { display: block; overflow: visible; }
+.chart svg { display: block; overflow: visible; cursor: grab; }
+.chart svg:active { cursor: grabbing; }
 .grid line { stroke: var(--grid); }
 .grid .domain { display: none; }
 .axis .domain { stroke: var(--axis); }

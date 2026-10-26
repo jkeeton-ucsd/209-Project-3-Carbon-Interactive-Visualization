@@ -13,7 +13,7 @@ const METRICS = {
 };
 
 export function draw(data) {
-  const state = { year: 2000, metric: "co2_pc", region: "all", timer: null };
+  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", timer: null };
   const years = [1960, LATEST_YEAR];
 
   // --- controls -------------------------------------------------------------
@@ -29,7 +29,10 @@ export function draw(data) {
   slider.on("input", function () { stop(); state.year = +this.value; update(250); });
   d3.select("#metric-select").on("change", function () { state.metric = this.value; build(); });
   d3.select("#region-select").on("change", function () { state.region = this.value; highlight(); });
+  d3.select("#country-search").on("input", function () { state.country = this.value.trim().toLowerCase(); highlight(); });
   playBtn.on("click", () => (state.timer ? stop() : play()));
+  d3.select("#reset-zoom-btn").on("click", () =>
+    svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
 
   function play() {
     if (state.year >= years[1]) state.year = years[0];
@@ -48,30 +51,52 @@ export function draw(data) {
   }
 
   // --- chart ----------------------------------------------------------------
-  let g, x, y, r, dotsLayer, yearLabel, width, height;
+  let svg, g, x, y, zx, zy, zoom, r, dotsLayer, yearLabel, width, height;
+  let gridSel, xAxisSel, yAxisSel;
 
   function build() {
     const m = METRICS[state.metric];
     const valid = data.filter((d) => d.gdp_pc > 0 && d[state.metric] != null && (!m.log || d[state.metric] > 0)
       && d.year <= LATEST_YEAR);
-    ({ g, width, height } = frame("#proto .chart", { height: 500 }));
+    ({ svg, g, width, height } = frame("#proto .chart", { height: 500 }));
 
     x = d3.scaleLog().domain(d3.extent(valid, (d) => d.gdp_pc)).nice().range([0, width]);
     y = (m.log ? d3.scaleLog() : d3.scaleLinear())
       .domain(d3.extent(valid, (d) => d[state.metric])).nice().range([height, 0]);
     r = d3.scaleSqrt().domain([0, d3.max(valid, (d) => d.pop)]).range([2, 34]);
+    zx = x.copy();
+    zy = y.copy();
+
+    g.append("clipPath").attr("id", "proto-clip").append("rect").attr("width", width).attr("height", height);
 
     yearLabel = g.append("text").attr("class", "year-watermark")
       .attr("x", width - 8).attr("y", height - 12).attr("text-anchor", "end");
 
-    g.append("g").attr("class", "grid").call(d3.axisLeft(y).ticks(6, m.log ? "~g" : undefined).tickSize(-width).tickFormat(""));
-    g.append("g").attr("class", "axis x").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(5, "$~s"));
-    g.append("g").attr("class", "axis y").call(d3.axisLeft(y).ticks(6, m.log ? "~g" : undefined));
+    gridSel = g.append("g").attr("class", "grid").call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined).tickSize(-width).tickFormat(""));
+    xAxisSel = g.append("g").attr("class", "axis x").attr("transform", `translate(0,${height})`).call(d3.axisBottom(zx).ticks(5, "$~s"));
+    yAxisSel = g.append("g").attr("class", "axis y").call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined));
     g.append("text").attr("class", "axis-label").attr("x", width).attr("y", height + 40)
       .attr("text-anchor", "end").text("GDP per capita (constant 2010 US$, log)");
     g.append("text").attr("class", "axis-label").attr("y", -6).text(m.label + (m.log ? ", log" : ""));
 
-    dotsLayer = g.append("g");
+    dotsLayer = g.append("g").attr("clip-path", "url(#proto-clip)");
+
+    zoom = d3.zoom()
+      .scaleExtent([1, 12])
+      .extent([[0, 0], [width, height]])
+      .translateExtent([[0, 0], [width, height]])
+      .on("zoom", ({ transform }) => {
+        zx = transform.rescaleX(x);
+        zy = transform.rescaleY(y);
+        gridSel.call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined).tickSize(-width).tickFormat(""));
+        xAxisSel.call(d3.axisBottom(zx).ticks(5, "$~s"));
+        yAxisSel.call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined));
+        dotsLayer.selectAll("circle")
+          .attr("cx", (d) => zx(d.gdp_pc))
+          .attr("cy", (d) => zy(d[state.metric]));
+      });
+    svg.call(zoom);
+
     update(0);
   }
 
@@ -90,7 +115,7 @@ export function draw(data) {
       .data(rows, (d) => d.code) // key by country so bubbles move instead of re-binding
       .join(
         (enter) => enter.append("circle").attr("class", "dot")
-          .attr("cx", (d) => x(d.gdp_pc)).attr("cy", (d) => y(d[state.metric])).attr("r", 0),
+          .attr("cx", (d) => zx(d.gdp_pc)).attr("cy", (d) => zy(d[state.metric])).attr("r", 0),
         (update) => update,
         (exit) => exit.transition().duration(duration).attr("r", 0).remove(),
       )
@@ -101,8 +126,8 @@ export function draw(data) {
       .on("mousemove", tooltip.move)
       .on("mouseleave", tooltip.hide)
       .transition().duration(duration).ease(d3.easeLinear)
-      .attr("cx", (d) => x(d.gdp_pc))
-      .attr("cy", (d) => y(d[state.metric]))
+      .attr("cx", (d) => zx(d.gdp_pc))
+      .attr("cy", (d) => zy(d[state.metric]))
       .attr("r", (d) => r(d.pop ?? 0));
 
     dotsLayer.selectAll("circle").order();
@@ -111,7 +136,10 @@ export function draw(data) {
 
   function highlight() {
     dotsLayer.selectAll("circle")
-      .classed("faded", (d) => state.region !== "all" && d.region !== state.region);
+      .classed("faded", (d) =>
+        (state.region !== "all" && d.region !== state.region) ||
+        (state.country && !d.country.toLowerCase().includes(state.country))
+      );
     legendItems.classed("faded", (d) => state.region !== "all" && d !== state.region);
   }
 

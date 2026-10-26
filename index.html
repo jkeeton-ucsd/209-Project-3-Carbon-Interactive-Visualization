@@ -34,9 +34,11 @@
         Axes are fixed across all years. Countries missing a value in a given year are hidden for that year.</p>
       <div class="controls">
         <button id="play-btn" type="button">Play</button>
+        <button id="reset-zoom-btn" type="button">Reset zoom</button>
         <label class="slider">Year <input id="year-slider" type="range" step="1"> <output id="year-value"></output></label>
         <label>Y axis <select id="metric-select"></select></label>
         <label>Highlight <select id="region-select"></select></label>
+        <label>Find <input id="country-search" type="search" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
       </div>
       <div class="chart"></div>
       <div class="legend"></div>
