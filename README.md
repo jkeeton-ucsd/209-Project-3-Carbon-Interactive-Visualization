@@ -2,7 +2,7 @@
 
 Project 3 — interactive D3 visualization of GDP per capita vs CO₂ (and other metrics) per person, 1960–2018, using World Bank data.
 
-**Live site:** `https://<your-username>.github.io/<repo-name>/`
+**Live site:** `https://jkeeton-ucsd.github.io/209-Project-3-Carbon-Interactive-Visualization/`
 
 ## What's here
 
@@ -44,11 +44,11 @@ python3 -m http.server 8000
    git add .
    git commit -m "Starter: checkpoint charts + prototype"
    git branch -M main
-   git remote add origin https://github.com/<you>/<repo>.git
+   git remote add origin https://github.com/jkeeton-ucsd/209-Project-3-Carbon-Interactive-Visualization.git
    git push -u origin main
    ```
 3. Repo → **Settings → Pages** → Source: *Deploy from a branch* → Branch `main`, folder `/ (root)` → Save.
-4. The site appears at `https://<you>.github.io/<repo>/` after a minute or two.
+4. The site appears at `https://jkeeton-ucsd.github.io/209-Project-3-Carbon-Interactive-Visualization/` after a minute or two.
 5. Add teammates under **Settings → Collaborators**.
 
 ## Rebuilding the data
