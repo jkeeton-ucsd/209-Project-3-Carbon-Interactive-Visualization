@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How Wealth Shapes Carbon Footprints</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Project 3 · Checkpoint</p>
+    <h1>How Wealth Shapes Carbon Footprints</h1>
+    <p class="lede">Do countries emit more CO₂ per person as they get richer — and does that relationship
+      change over time? World Bank indicators for ~210 countries, 1960–2018.</p>
+    <p class="team">Team: <span>[Team name]</span> — [Member 1], [Member 2], [Member 3], [Member 4]</p>
+    <nav>
+      <a href="#proto">Prototype</a>
+      <a href="#ex1">1 · Wealth vs CO₂</a>
+      <a href="#ex2">2 · Income-group trends</a>
+      <a href="#ex3">3 · Top emitters</a>
+      <a href="#ex4">4 · Wealth vs life expectancy</a>
+      <a href="#ex5">5 · Country trajectories</a>
+      <a href="#data">Data</a>
+      <a href="#writeup">Write-up</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ PROTOTYPE OF FINAL GRAPHIC ============ -->
+    <section id="proto" class="card featured">
+      <h2>Work in progress: wealth vs. emissions over time</h2>
+      <p class="subtitle">Each bubble is a country, sized by population and colored by World Bank region.
+        Axes are fixed across all years. Countries missing a value in a given year are hidden for that year.</p>
+      <div class="controls">
+        <button id="play-btn" type="button">Play</button>
+        <label class="slider">Year <input id="year-slider" type="range" step="1"> <output id="year-value"></output></label>
+        <label>Y axis <select id="metric-select"></select></label>
+        <label>Highlight <select id="region-select"></select></label>
+      </div>
+      <div class="chart"></div>
+      <div class="legend"></div>
+      <p class="stat"></p>
+    </section>
+
+    <h2 class="section-title">Exploratory graphs</h2>
+
+    <section id="ex1" class="card">
+      <h3>1 · Richer countries emit more CO₂ per person</h3>
+      <p class="subtitle">GDP per capita vs CO₂ per capita, 2018. Log–log axes; bubble area = population.</p>
+      <div class="chart"></div>
+      <div class="legend"></div>
+      <p class="stat"></p>
+      <p class="notes"><b>What we noticed:</b> [fill in — e.g. strong positive relationship, Gulf states sit far above the trend]</p>
+    </section>
+
+    <section id="ex2" class="card">
+      <h3>2 · Per-capita emissions by income group, 1960–2018</h3>
+      <p class="subtitle">Median CO₂ per capita across countries in each income group (2021 World Bank classification applied to every year). Hover for values.</p>
+      <div class="chart"></div>
+      <div class="legend"></div>
+      <p class="notes"><b>What we noticed:</b> [fill in]</p>
+    </section>
+
+    <section id="ex3" class="card">
+      <h3>3 · Who are the biggest emitters? Depends how you count</h3>
+      <p class="subtitle">Top 15 countries in 2018.</p>
+      <div class="controls">
+        <button type="button" data-measure="co2_pc" class="active">Per person</button>
+        <button type="button" data-measure="co2_kt">Total</button>
+      </div>
+      <div class="chart"></div>
+      <p class="notes"><b>What we noticed:</b> [fill in — the two lists barely overlap]</p>
+    </section>
+
+    <section id="ex4" class="card">
+      <h3>4 · Wealth vs life expectancy</h3>
+      <p class="subtitle">GDP per capita (log) vs life expectancy at birth, 2018. Life expectancy is the mean of the male and female series.</p>
+      <div class="chart"></div>
+      <div class="legend"></div>
+      <p class="notes"><b>What we noticed:</b> [fill in — gains flatten out at high incomes]</p>
+    </section>
+
+    <section id="ex5" class="card">
+      <h3>5 · Paths through wealth–carbon space</h3>
+      <p class="subtitle">Each line traces one country from 1960 to 2018; larger dots mark each decade. Hover a line to isolate it.</p>
+      <div class="chart"></div>
+      <p class="notes"><b>What we noticed:</b> [fill in — US/UK/Germany bend back down while China/India keep climbing → motivates the animated version]</p>
+    </section>
+
+    <section id="data" class="card prose">
+      <h2>Data &amp; transformations</h2>
+      <p>Source: World Bank World Development Indicators, via
+        <a href="https://github.com/light-and-salt/World-Bank-Data-by-Indicators">light-and-salt/World-Bank-Data-by-Indicators</a>.
+        <code>scripts/prepare_data.py</code> builds <code>data/wb_clean.csv</code>:</p>
+      <ul>
+        <li>Joins GDP per capita (constant 2010 US$), CO₂ per capita and total, population, life expectancy, energy use, renewable share and urban share by country and year.</li>
+        <li>Keeps only countries; regional and income aggregates (“World”, “High income”, …) are dropped.</li>
+        <li>Life expectancy is the average of the female and male series (no total series in the source).</li>
+        <li>CO₂ data ends in 2018, so charts stop there.</li>
+      </ul>
+    </section>
+
+    <section id="writeup" class="card prose">
+      <h2>Write-up</h2>
+      <h3>Design rationale</h3>
+      <p>[To do for the final submission — encodings, interactions, alternatives considered.]</p>
+      <h3>Development process</h3>
+      <p>[To do — who did what, people-hours, what took longest.]</p>
+    </section>
+  </main>
+
+  <footer>Built with D3.js · Data: World Bank WDI</footer>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
