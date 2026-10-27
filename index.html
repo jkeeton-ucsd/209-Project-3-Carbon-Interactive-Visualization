@@ -21,6 +21,7 @@
       <a href="#ex3">3 · Top emitters</a>
       <a href="#ex4">4 · Wealth vs life expectancy</a>
       <a href="#ex5">5 · Country trajectories</a>
+      <a href="#ex6">6 · U.S. vs China</a>
       <a href="#data">Data</a>
       <a href="#writeup">Write-up</a>
     </nav>
@@ -38,11 +39,15 @@
         <label class="slider">Year <input id="year-slider" type="range" step="1"> <output id="year-value"></output></label>
         <label>Y axis <select id="metric-select"></select></label>
         <label>Highlight <select id="region-select"></select></label>
-        <label>Find <input id="country-search" type="search" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
+        <label>Color by <select id="color-select"><option value="region">Region</option><option value="income">Income group</option></select></label>
+        <label>Find <input id="country-search" type="search" list="country-list" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
+        <datalist id="country-list"></datalist>
+        <button id="clear-trails-btn" type="button">Clear trails</button>
       </div>
       <div class="chart"></div>
       <div class="legend"></div>
       <p class="stat"></p>
+      <p class="stat trail-note"></p>
     </section>
 
     <h2 class="section-title">Exploratory graphs</h2>
@@ -88,6 +93,14 @@
       <p class="subtitle">Each line traces one country from 1960 to 2018; larger dots mark each decade. Hover a line to isolate it.</p>
       <div class="chart"></div>
       <p class="notes"><b>What we noticed:</b> [fill in — US/UK/Germany bend back down while China/India keep climbing → motivates the animated version]</p>
+    </section>
+
+    <section id="ex6" class="card">
+      <h3>6 · U.S. vs China: depends how you count</h3>
+      <p class="subtitle">CO₂ per person (left) and total CO₂ (right), 1960–2018. Total converted from kilotonnes to billion tonnes. Hover for values.</p>
+      <div class="chart small-multiples"></div>
+      <p class="stat"></p>
+      <p class="notes"><b>What we noticed:</b> [fill in]</p>
     </section>
 
     <section id="data" class="card prose">
