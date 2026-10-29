@@ -1,8 +1,10 @@
 // Prototype of the final graphic: animated bubble scatter.
 //   x = GDP per capita (log), y = selectable metric, size = population, color = region
-//   Interactions: year slider + play, y-metric dropdown, region highlight dropdown, tooltips.
+//   Interactions: year slider + play, y-metric dropdown, region highlight dropdown, tooltips,
+//   color by region or income group, and pinned country trails (click a bubble or pick a country).
 // Axis domains are fixed across ALL years so motion over time is honest.
-import { LATEST_YEAR, REGIONS, regionColor, frame, legend, tooltip, fmt } from "./common.js";
+import { LATEST_YEAR, REGIONS, regionColor, INCOME_GROUPS, incomeColor, frame, legend, tooltip, fmt } from "./common.js";
+import { trailRows, drawTrails } from "./trails.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const METRICS = {
@@ -13,7 +15,11 @@ const METRICS = {
 };
 
 export function draw(data) {
-  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", timer: null };
+  // state.region is the highlight filter: a region, or an income group when coloring by income.
+  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", colorBy: "region", pinned: [], timer: null };
+  const groupsFor = () => (state.colorBy === "income" ? INCOME_GROUPS : REGIONS);
+  const groupOf = (d) => (state.colorBy === "income" ? d.income : d.region);
+  const colorOf = (d) => (state.colorBy === "income" ? incomeColor(d.income) : regionColor(d.region));
   const years = [1960, LATEST_YEAR];
 
   // --- controls -------------------------------------------------------------
@@ -23,13 +29,40 @@ export function draw(data) {
 
   d3.select("#metric-select").selectAll("option").data(Object.entries(METRICS)).join("option")
     .attr("value", ([k]) => k).text(([, m]) => m.label);
-  d3.select("#region-select").selectAll("option").data(["all", ...REGIONS]).join("option")
-    .attr("value", (d) => d).text((d) => (d === "all" ? "All regions" : d));
+  function fillHighlightOptions() {
+    d3.select("#region-select").selectAll("option").data(["all", ...groupsFor()]).join("option")
+      .attr("value", (d) => d)
+      .text((d) => (d === "all" ? (state.colorBy === "income" ? "All income groups" : "All regions") : d));
+    d3.select("#region-select").property("value", state.region);
+  }
+  fillHighlightOptions();
+
+  // Country names for the search box's autocomplete list.
+  const countryByName = new Map(data.map((d) => [d.country.toLowerCase(), d]));
+  d3.select("#country-list").selectAll("option")
+    .data([...new Set(data.map((d) => d.country))].sort()).join("option").attr("value", (d) => d);
 
   slider.on("input", function () { stop(); state.year = +this.value; update(250); });
   d3.select("#metric-select").on("change", function () { state.metric = this.value; build(); });
   d3.select("#region-select").on("change", function () { state.region = this.value; highlight(); });
   d3.select("#country-search").on("input", function () { state.country = this.value.trim().toLowerCase(); highlight(); });
+  // Picking an exact country name (Enter or the autocomplete list) pins its trail.
+  d3.select("#country-search").on("change", function () {
+    const match = countryByName.get(this.value.trim().toLowerCase());
+    if (!match) return;
+    if (!state.pinned.includes(match.code)) togglePin(match.code);
+    this.value = "";
+    state.country = "";
+    highlight();
+  });
+  d3.select("#color-select").on("change", function () {
+    state.colorBy = this.value;
+    state.region = "all";
+    fillHighlightOptions();
+    buildLegend();
+    update(0);
+  });
+  d3.select("#clear-trails-btn").on("click", () => { state.pinned = []; renderTrails(0); highlight(); });
   playBtn.on("click", () => (state.timer ? stop() : play()));
   d3.select("#reset-zoom-btn").on("click", () =>
     svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
@@ -51,7 +84,7 @@ export function draw(data) {
   }
 
   // --- chart ----------------------------------------------------------------
-  let svg, g, x, y, zx, zy, zoom, r, dotsLayer, yearLabel, width, height;
+  let svg, g, x, y, zx, zy, zoom, r, dotsLayer, trailsLayer, yearLabel, width, height;
   let gridSel, xAxisSel, yAxisSel;
 
   function build() {
@@ -80,6 +113,7 @@ export function draw(data) {
     g.append("text").attr("class", "axis-label").attr("y", -6).text(m.label + (m.log ? ", log" : ""));
 
     dotsLayer = g.append("g").attr("clip-path", "url(#proto-clip)");
+    trailsLayer = g.append("g").attr("class", "trails").attr("clip-path", "url(#proto-clip)");
 
     zoom = d3.zoom()
       .scaleExtent([1, 12])
@@ -94,6 +128,7 @@ export function draw(data) {
         dotsLayer.selectAll("circle")
           .attr("cx", (d) => zx(d.gdp_pc))
           .attr("cy", (d) => zy(d[state.metric]));
+        renderTrails(0);
       });
     svg.call(zoom);
 
@@ -119,38 +154,69 @@ export function draw(data) {
         (update) => update,
         (exit) => exit.transition().duration(duration).attr("r", 0).remove(),
       )
-      .attr("fill", (d) => regionColor(d.region))
+      .attr("fill", (d) => colorOf(d))
       .on("mouseenter", (e, d) => tooltip.show(e, `<strong>${d.country}</strong> <span class="muted">${d.year}</span><br>
         <span class="muted">${d.region} · ${d.income || "n/a"}</span><br>
         GDP / person: ${fmt.usd(d.gdp_pc)}<br>${m.label}: <b>${m.f(d[state.metric])}</b><br>Population: ${fmt.pop(d.pop)}`))
       .on("mousemove", tooltip.move)
       .on("mouseleave", tooltip.hide)
+      .on("click", (e, d) => togglePin(d.code))
       .transition().duration(duration).ease(d3.easeLinear)
       .attr("cx", (d) => zx(d.gdp_pc))
       .attr("cy", (d) => zy(d[state.metric]))
       .attr("r", (d) => r(d.pop ?? 0));
 
     dotsLayer.selectAll("circle").order();
+    renderTrails(duration);
     highlight();
+  }
+
+  // --- trails ---------------------------------------------------------------
+  function togglePin(code) {
+    state.pinned = state.pinned.includes(code)
+      ? state.pinned.filter((c) => c !== code)
+      : [...state.pinned, code];
+    renderTrails(0);
+    highlight();
+  }
+
+  function renderTrails(duration) {
+    if (!trailsLayer) return;
+    const m = METRICS[state.metric];
+    const series = state.pinned.map((code) => {
+      const rows = trailRows(data, code, state.year, state.metric, m.log);
+      const any = rows.at(-1) ?? data.find((d) => d.code === code);
+      return { code, country: any.country, color: colorOf(any), rows };
+    });
+    drawTrails(trailsLayer, series, zx, zy, state.metric, duration);
+    d3.select("#proto .trail-note").text(state.pinned.length
+      ? `Trails: ${series.map((s) => s.country).join(", ")}. Click a bubble again to remove it.`
+      : "Tip: click a bubble, or pick a country in Find, to draw its path over time.");
   }
 
   function highlight() {
     dotsLayer.selectAll("circle")
       .classed("faded", (d) =>
-        (state.region !== "all" && d.region !== state.region) ||
+        (state.region !== "all" && groupOf(d) !== state.region) ||
         (state.country && !d.country.toLowerCase().includes(state.country))
-      );
+      )
+      .classed("pinned", (d) => state.pinned.includes(d.code));
     legendItems.classed("faded", (d) => state.region !== "all" && d !== state.region);
   }
 
-  // Clicking a legend entry is a shortcut for the region dropdown.
-  const legendItems = legend("#proto .legend", REGIONS, regionColor)
-    .style("cursor", "pointer")
-    .on("click", (_, d) => {
-      state.region = state.region === d ? "all" : d;
-      d3.select("#region-select").property("value", state.region);
-      highlight();
-    });
+  // Clicking a legend entry is a shortcut for the highlight dropdown.
+  let legendItems;
+  function buildLegend() {
+    const colorFn = state.colorBy === "income" ? incomeColor : regionColor;
+    legendItems = legend("#proto .legend", groupsFor(), colorFn)
+      .style("cursor", "pointer")
+      .on("click", (_, d) => {
+        state.region = state.region === d ? "all" : d;
+        d3.select("#region-select").property("value", state.region);
+        highlight();
+      });
+  }
+  buildLegend();
 
   build();
   window.addEventListener("resize", debounce(build, 200));

@@ -6,10 +6,11 @@ import * as ex2 from "./explore2_income_trends.js";
 import * as ex3 from "./explore3_top_emitters.js";
 import * as ex4 from "./explore4_wealth_vs_life.js";
 import * as ex5 from "./explore5_trajectories.js";
+import * as ex6 from "./explore6_us_china.js";
 import * as proto from "./prototype.js";
 
 loadData().then((data) => {
-  for (const chart of [proto, ex1, ex2, ex3, ex4, ex5]) {
+  for (const chart of [proto, ex1, ex2, ex3, ex4, ex5, ex6]) {
     try {
       chart.draw(data);
     } catch (err) {
