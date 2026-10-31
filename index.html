@@ -148,9 +148,174 @@
     <section id="writeup" class="card prose">
       <h2>Write-up</h2>
       <h3>Design rationale</h3>
-      <p>[To do for the final submission — encodings, interactions, alternatives considered.]</p>
+       <h4>The question</h4>
+      <p>
+        We wanted to know whether countries emit more carbon per-capita as they get richer per-capita and, if so,
+        whether that relationship has evolved since 1960. Our data exploration pointed in two directions.
+        Across all countries wealth and per-capita emissions are tightly correlated with a log-log correlation
+        of 0.88 in 2018. But individual countries' paths showed different trends over time, and as a whole the
+        log-log relationship between GDP and emissions evolved from a linear trend in the 90's to a curved
+        relationship in 2010's (meaning wealthy countries have decoupled some economic growth from emissions). A static
+        representation does not capture these changes over time, so we built an interactive plot that moves
+        through time.
+      </p>
+
+      <h4>Visual encodings</h4>
+      <ul>
+        <li>
+          <b>GDP per-capita on x-axis and emissions per-capita on y-axis.</b> 
+          This decision was straightforward as both axes represent the two parts of the relationship we
+          are examining in our original question.
+        </li>
+        <li>
+          <b>Log scales.</b> 
+          GDP and CO₂ both span orders of magnitudes ($130 to $141k GDP per person and 0.01t to 62t of emissions 
+          per person). On linear axes the countries were squashed into the bottom left-corner with a few rich or 
+          high emitting countries taking up the rest of the plot. On a log-axes we can see trends across all income levels.
+        </li>
+        <li>
+          <b>Fixed axes across all years.</b> 
+          If the axes rescaled each year then countries may appear to move when the reality is that the frame changed.
+          To avoid deceiving the audience, we fixed both axes to show only real change over time.
+        </li>
+        <li>
+          <b>Bubble area for population.</b>
+          Including population is for context, not the main point, so we gave it a weaker encoding.
+          We used a square-root scale so area, not radius, is proportional to population. This is to prevent
+          large countries looking disproportionately larger. We also draw large countries first so smaller countries
+          don't get lost behind them. We considered sizing the bubbles by total carbon emissions, but that would have muddled
+          the per-capita data story we were pursuing so for clarity we chose population.
+        </li>
+        <li>
+          <b>Coloring for region.</b> 
+          Region is a categorical attribute, so each region gets a distinct color that they keep over the years.
+          Seven regions is near the limit of hues people can tell apart, so we added the ability to highlight specific
+          regions. We added this interaction so that the audience can explore region to region similarities. We could have colored
+          by another attribute like total GDP, life expectancy, etc. but we thought region may better address the primary question.
+        </li>
+      </ul>
+      
+      <h4>Interaction techniques</h4>
+      <ul>
+        <li>
+          <b>Year slider with animation.</b> 
+          The animation shows the drift of our cloud of points over time, and the slider lets the reader
+          stop on any year. We considered showing change at fixed instances like decades, but for finer granularity we chose continuous animation, 
+          which lets the audience stop on any snapshot.
+          We also added the ability to show trails (expanded below) to cover the main weakness of a continuous animation;
+          that it's hard to remember the changes over time.
+        </li>
+        <li>
+          <b>Trails and "Find".</b> 
+          Clicking a bubble, or picking a country in "Find", draws that country's path up to the selected year.
+          Users can add additional trails by searching for more countries with "Find". "Find" lets readers locate a specific
+          country among ~200.
+        </li>
+        <li>
+          <b>Highlight by region or income group.</b> 
+          The highlight dropdown, or a click on the legend, fades the
+          other groups so that the audience can isolate a subset of countries while still getting the surrounding
+          context.
+        </li>
+        <li>
+          <b>Optional trend line.</b> 
+          We have the option of imposing a LOESS curve fitted to each year's countries, in the same log space the
+          chart is drawn in. We considered a straight regression line, but the data in the 2000's appeared to gain a 
+          bend that flattens among high GDP countries. LOESS fits small local lines so the trend is dynamic, although in
+          early years the line is vulnerable to some outlier points. Each country counts equally, instead of weighing by
+          population, because we're interested in country to country comparisons.
+        </li>
+        <li>
+          <b>Tooltips, zoom/pan and search.</b> 
+          Hovering shows exact values in a tooltip, while zoom/pan help with the dense clusters of countries where
+          bubbles may overlap.
+        </li>
+      </ul>
+ 
+      <h4>Data transformations</h4>
+      <ul>
+        <li>
+          Kept only individual countries. Filtered out World Bank aggregates such as "World" and "High income" to avoid
+          mistakenly plotting non-countries.
+        </li>
+        <li>
+          Used GDP per capita in constant 2010 USD. A purchasing power variable would have been better for comparison, but 
+          due to our visual starting in the 1960's this variable was not available for our full time span.
+        </li>
+        <li>
+          Log transformation of both GDP and emissions was appropriate due to the many magnitudes of data 
+          both attributes cover ($130 to $141k GDP per person and 0.01t to 62t of emissions 
+          per person).
+        </li>
+        <li>
+          Countries missing a value in a year are hidden that year, so the number of countries shown grows from
+          about 100 in the 1960's to about 185 in 2018. Additionally, emissions data ends in 2018 so the timeline stops there.
+        </li>
+
+      </ul>
+ 
+      <h4>What we considered and dropped</h4>
+      <ul>
+        <li>
+          <b>A geographic map showing emissions over time.</b> 
+          A map would have been more engaging and intuitive, but it struggles to show the relationship between
+          GDP and emissions. Additionally, large countries would have dominated visually.
+        </li>
+        <li>
+          <b>Isolating just the U.S. and China</b> 
+          Emissions from the U.S. and China dominate media coverage domestically, so we briefly considered
+          focusing on just those two countries. The scope felt too limiting and could still be achieved in a 
+          well designed visual for all countries so we opted for the latter.
+        </li>
+        <li>
+          <b>Bringing in life-expectancy</b> 
+          We considered bringing in a third dimension like life expectancy, but the chart quickly became 
+          confusing and we could only effectively showcase one x-y comparison on the axes effectively.
+        </li>
+      </ul>
+
       <h3>Development process</h3>
-      <p>[To do — who did what, people-hours, what took longest.]</p>
+      <p><b>How we split the work.</b></p>
+      <ul>
+        <li>
+          Aidan: Revisions on exploratory graphs, contributions to primary interactive plot interactivity 
+          (initial trails, improvement to searchability),
+          dataset/question ideating, and contributions to final write-up.
+        </li>
+        <li>
+          Anirudh: Exploratory graph 6, contributions to primary plot interactivity (improvement to trails,
+          improvement to searchability, refining highlights), dataset/question ideating, and contributions 
+          to final write-up.
+        </li>
+        <li>
+          Jack: Exploratory graph first drafts, primary plot first draft, dataset/question ideating, and contributions
+          to final write-up.
+        </li>
+      </ul>
+ 
+      <p>
+        <b>Time spent.</b> 
+        Roughly 18 people-hours in total: about 3 on data exploration and cleaning,
+        4 on the exploratory graphs and its revisions, 6 on the main interactive graphic and its revisions, 
+        and 5 on styling, testing and the write-up.
+      </p>
+ 
+      <p><b>What took the most time.</b></p>
+      <ul>
+        <li>
+          Data wrangling and cleaning. We had familiarity with dataset from project 2 but considering our choices
+          of variables and how we're going to process the data to feed to D3 was more difficult than expected.
+        </li>
+        <li>
+          Getting the animation right. Making sure that bubbles don't hide each other, that movement is trackable,
+          that the animation is responsive to the user, ease of country selection, and all the other aspects we detailed
+          above was a long process of revisions.
+        </li>
+      </ul>
+      <p>With more time we would have explored connecting other similar plots showcasing life expectancy, energy use,
+        and other interesting metrics so users could explore changes over time across multiple metrics to find interesting patterns.
+        For example, does a country that increases emissions over time also increase their life expectancy? Or are those two ideas decoupled?
+      </p>
     </section>
   </main>
 
