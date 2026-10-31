@@ -10,10 +10,10 @@
 <body>
   <header>
     <p class="eyebrow">Project 3 · Checkpoint</p>
-    <h1>How Wealth Shapes Carbon Footprints</h1>
-    <p class="lede">Do countries emit more CO₂ per person as they get richer — and does that relationship
-      change over time? World Bank indicators for ~210 countries, 1960–2018.</p>
-    <p class="team">Team: <span>The Chart Toppers</span> — Aidan Sanchez, Anirudh Sai, Jack Keeton</p>
+    <h1>Do countries emit more CO₂ per person as they get richer and does that relationship
+      change over time?</h1>
+    <p class="lede">World Bank indicators for ~210 countries, 1960-2018.</p>
+    <p class="team">Team: <span>The Chart Toppers</span> - Aidan Sanchez, Anirudh Sai, Jack Keeton</p>
     <nav>
       <a href="#proto">Prototype</a>
       <a href="#ex1">1 · Wealth vs CO₂</a>
@@ -43,6 +43,7 @@
         <label>Find <input id="country-search" type="search" list="country-list" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
         <datalist id="country-list"></datalist>
         <button id="clear-trails-btn" type="button">Clear trails</button>
+        <label><input id="trend-toggle" type="checkbox"> Trend line</label>
       </div>
       <div class="chart"></div>
       <div class="legend"></div>
@@ -54,7 +55,7 @@
 
     <section id="ex1" class="card">
       <h3>1 · Richer countries emit more CO₂ per person</h3>
-      <p class="subtitle">GDP per capita vs CO₂ per capita, 2018. Log–log axes; bubble area = population.</p>
+      <p class="subtitle">GDP per capita vs CO₂ per capita, 2018. Log-log axes; bubble area = population.</p>
       <div class="chart"></div>
       <div class="legend"></div>
       <p class="stat"></p>
@@ -68,13 +69,13 @@
     </section>
 
     <section id="ex2" class="card">
-      <h3>2 · Per-capita emissions by income group, 1960–2018</h3>
+      <h3>2 · Per-capita emissions by income group, 1960-2018</h3>
       <p class="subtitle">Median CO₂ per capita across countries in each income group (2021 World Bank classification applied to every year). Hover for values.</p>
       <div class="chart"></div>
       <div class="legend"></div>
       <p class="notes"><b>What we noticed:</b> High-income countries have the highest median CO₂ per capita in
         every year shown. That bracket started at 3.54 tonnes in 1960, held relatively steady around 8 tonnes from
-        1975–2002, peaked at 9.07 tonnes in 2004, then dropped to 6.67 tonnes by 2018 — well above every other
+        1975-2002, peaked at 9.07 tonnes in 2004, then dropped to 6.67 tonnes by 2018 — well above every other
         income category throughout. Upper-middle-income countries rose from 0.65 to 3.22 tonnes, lower-middle-income
         countries from 0.22 to 0.90 tonnes, and low-income countries from 0.05 to 0.17 tonnes. Every income class
         increased its median CO₂ per capita from 1960 to 2018.</p>
@@ -100,8 +101,8 @@
       <div class="chart"></div>
       <div class="legend"></div>
       <p class="notes"><b>What we noticed:</b> There is a strong positive relationship between GDP per capita (log)
-        and life expectancy at birth. Lower-income countries cluster around 55–70 years, while higher-income
-        countries cluster around 80–85 years. Sub-Saharan African countries dominate the lower-left of the chart
+        and life expectancy at birth. Lower-income countries cluster around 55-70 years, while higher-income
+        countries cluster around 80-85 years. Sub-Saharan African countries dominate the lower-left of the chart
         (lower GDP, lower life expectancy), while European and Central Asian countries dominate the upper-right
         (higher GDP, higher life expectancy). The spread of life expectancy narrows considerably at higher incomes —
         meaning larger gains in GDP per capita correspond to smaller gains in longevity once a country is already
@@ -109,7 +110,7 @@
     </section>
 
     <section id="ex5" class="card">
-      <h3>5 · Paths through wealth–carbon space</h3>
+      <h3>5 · Paths through wealth-carbon space</h3>
       <p class="subtitle">Each line traces one country from 1960 to 2018; larger dots mark each decade. Hover a line to isolate it.</p>
       <div class="chart"></div>
       <p class="notes"><b>What we noticed:</b> The United States, United Kingdom, and Germany all show rising GDP
@@ -122,10 +123,13 @@
 
     <section id="ex6" class="card">
       <h3>6 · U.S. vs China: depends how you count</h3>
-      <p class="subtitle">CO₂ per person (left) and total CO₂ (right), 1960–2018. Total converted from kilotonnes to billion tonnes. Hover for values.</p>
+      <p class="subtitle">CO₂ per person (left) and total CO₂ (right), 1960-2018. Total converted from kilotonnes to billion tonnes. Hover for values.</p>
       <div class="chart small-multiples"></div>
       <p class="stat"></p>
-      <p class="notes"><b>What we noticed:</b> [fill in]</p>
+      <p class="notes"><b>What we noticed:</b> The emissions for China and the United States can be characterized 
+      differently based on if you look at total or per capita emissions. Looking at totals, China far exceeds the United 
+      States post-2005, and if you look at per-capita the reverse is true. Focusing on just two countries may be limiting
+      as a visualization but the interpretation is very simple.</p>
     </section>
 
     <section id="data" class="card prose">
