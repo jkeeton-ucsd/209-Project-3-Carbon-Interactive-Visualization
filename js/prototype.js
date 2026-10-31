@@ -5,6 +5,7 @@
 // Axis domains are fixed across ALL years so motion over time is honest.
 import { LATEST_YEAR, REGIONS, regionColor, INCOME_GROUPS, incomeColor, frame, legend, tooltip, fmt } from "./common.js";
 import { trailRows, drawTrails } from "./trails.js";
+import { loessCurve, drawTrend } from "./trend.js"; 
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const METRICS = {
@@ -16,7 +17,7 @@ const METRICS = {
 
 export function draw(data) {
   // state.region is the highlight filter: a region, or an income group when coloring by income.
-  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", colorBy: "region", pinned: [], timer: null };
+  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", colorBy: "region", pinned: [], trend: false, timer: null };
   const groupsFor = () => (state.colorBy === "income" ? INCOME_GROUPS : REGIONS);
   const groupOf = (d) => (state.colorBy === "income" ? d.income : d.region);
   const colorOf = (d) => (state.colorBy === "income" ? incomeColor(d.income) : regionColor(d.region));
@@ -63,6 +64,11 @@ export function draw(data) {
     update(0);
   });
   d3.select("#clear-trails-btn").on("click", () => { state.pinned = []; renderTrails(0); highlight(); });
+  d3.select("#trend-toggle").property("checked", state.trend).on("change", function () {
+    state.trend = this.checked;
+    renderTrend(250);
+  });
+  playBtn.on("click", () => (state.timer ? stop() : play()));   // existing line
   playBtn.on("click", () => (state.timer ? stop() : play()));
   d3.select("#reset-zoom-btn").on("click", () =>
     svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
@@ -84,7 +90,8 @@ export function draw(data) {
   }
 
   // --- chart ----------------------------------------------------------------
-  let svg, g, x, y, zx, zy, zoom, r, dotsLayer, trailsLayer, yearLabel, width, height;
+  let svg, g, x, y, zx, zy, zoom, r, dotsLayer, trendLayer, trailsLayer, yearLabel, width, height;
+  let trendCurve = []; // last LOESS fit, reused when zooming so we don't refit
   let gridSel, xAxisSel, yAxisSel;
 
   function build() {
@@ -104,7 +111,7 @@ export function draw(data) {
 
     yearLabel = g.append("text").attr("class", "year-watermark")
       .attr("x", width - 8).attr("y", height - 12).attr("text-anchor", "end");
-
+    
     gridSel = g.append("g").attr("class", "grid").call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined).tickSize(-width).tickFormat(""));
     xAxisSel = g.append("g").attr("class", "axis x").attr("transform", `translate(0,${height})`).call(d3.axisBottom(zx).ticks(5, "$~s"));
     yAxisSel = g.append("g").attr("class", "axis y").call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined));
@@ -113,6 +120,7 @@ export function draw(data) {
     g.append("text").attr("class", "axis-label").attr("y", -6).text(m.label + (m.log ? ", log" : ""));
 
     dotsLayer = g.append("g").attr("clip-path", "url(#proto-clip)");
+    trendLayer = g.append("g").attr("class", "trend").attr("clip-path", "url(#proto-clip)");
     trailsLayer = g.append("g").attr("class", "trails").attr("clip-path", "url(#proto-clip)");
 
     zoom = d3.zoom()
@@ -129,6 +137,7 @@ export function draw(data) {
           .attr("cx", (d) => zx(d.gdp_pc))
           .attr("cy", (d) => zy(d[state.metric]));
         renderTrails(0);
+        drawTrend(trendLayer, trendCurve, zx, zy, 0);
       });
     svg.call(zoom);
 
@@ -167,8 +176,25 @@ export function draw(data) {
       .attr("r", (d) => r(d.pop ?? 0));
 
     dotsLayer.selectAll("circle").order();
+    renderTrend(duration, rows);
     renderTrails(duration);
     highlight();
+  }
+
+  // --- trend line -----------------------------------------------------------
+  // Fitted to every country shown this year (each country counts once, regardless
+  // of population). Highlighting a region doesn't change the fit.
+  function renderTrend(duration, rows) {
+    if (!trendLayer) return;
+    const m = METRICS[state.metric];
+    if (state.trend) {
+      rows ??= data.filter((d) => d.year === state.year && d.gdp_pc > 0
+        && d[state.metric] != null && (!m.log || d[state.metric] > 0));
+      trendCurve = loessCurve(rows, state.metric, m.log);
+    } else {
+      trendCurve = [];
+    }
+    drawTrend(trendLayer, trendCurve, zx, zy, duration);
   }
 
   // --- trails ---------------------------------------------------------------
