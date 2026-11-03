@@ -154,8 +154,8 @@
         whether that relationship has evolved since 1960. Our data exploration pointed in two directions.
         Across all countries wealth and per-capita emissions are tightly correlated with a log-log correlation
         of 0.88 in 2018. But individual countries' paths showed different trends over time, and as a whole the
-        log-log relationship between GDP and emissions evolved from a linear trend in the 90's to a curved
-        relationship in 2010's (meaning wealthy countries have decoupled some economic growth from emissions). A static
+        log-log relationship between GDP and emissions evolved from a linear trend in the 90s to a curved
+        relationship in 2010s (meaning wealthy countries have decoupled some economic growth from emissions). A static
         representation does not capture these changes over time, so we built an interactive plot that moves
         through time.
       </p>
@@ -169,7 +169,7 @@
         </li>
         <li>
           <b>Log scales.</b> 
-          GDP and CO₂ both span orders of magnitudes ($130 to $141k GDP per person and 0.01t to 62t of emissions 
+          GDP and CO₂ both span orders of magnitude ($130 to $141k GDP per person and 0.01t to 62t of emissions 
           per person). On linear axes the countries were squashed into the bottom left-corner with a few rich or 
           high emitting countries taking up the rest of the plot. On a log-axes we can see trends across all income levels.
         </li>
@@ -215,14 +215,15 @@
           <b>Highlight by region or income group.</b> 
           The highlight dropdown, or a click on the legend, fades the
           other groups so that the audience can isolate a subset of countries while still getting the surrounding
-          context.
+          context. The dropbox can be used to highlight either region or income group, allowing the
+          audience to explore trending within a sub-group of countries.
         </li>
         <li>
           <b>Optional trend line.</b> 
           We have the option of imposing a LOESS curve fitted to each year's countries, in the same log space the
-          chart is drawn in. We considered a straight regression line, but the data in the 2000's appeared to gain a 
+          chart is drawn in. We considered a straight regression line, but the data in the 2000s appeared to gain a 
           bend that flattens among high GDP countries. LOESS fits small local lines so the trend is dynamic, although in
-          early years the line is vulnerable to some outlier points. Each country counts equally, instead of weighing by
+          early years the line is vulnerable to some outlier points. Each country counts equally, instead of weighting by
           population, because we're interested in country to country comparisons.
         </li>
         <li>
@@ -240,7 +241,7 @@
         </li>
         <li>
           Used GDP per capita in constant 2010 USD. A purchasing power variable would have been better for comparison, but 
-          due to our visual starting in the 1960's this variable was not available for our full time span.
+          due to our visual starting in the 1960s this variable was not available for our full time span.
         </li>
         <li>
           Log transformation of both GDP and emissions was appropriate due to the many magnitudes of data 
@@ -249,7 +250,7 @@
         </li>
         <li>
           Countries missing a value in a year are hidden that year, so the number of countries shown grows from
-          about 100 in the 1960's to about 185 in 2018. Additionally, emissions data ends in 2018 so the timeline stops there.
+          about 80 in the 1960s to about 185 in 2018. Additionally, emissions data ends in 2018 so the timeline stops there.
         </li>
 
       </ul>
@@ -262,13 +263,13 @@
           GDP and emissions. Additionally, large countries would have dominated visually.
         </li>
         <li>
-          <b>Isolating just the U.S. and China</b> 
+          <b>Isolating just the U.S. and China.</b> 
           Emissions from the U.S. and China dominate media coverage domestically, so we briefly considered
           focusing on just those two countries. The scope felt too limiting and could still be achieved in a 
           well designed visual for all countries so we opted for the latter.
         </li>
         <li>
-          <b>Bringing in life-expectancy</b> 
+          <b>Bringing in life-expectancy.</b> 
           We considered bringing in a third dimension like life expectancy, but the chart quickly became 
           confusing and we could only effectively showcase one x-y comparison on the axes effectively.
         </li>
