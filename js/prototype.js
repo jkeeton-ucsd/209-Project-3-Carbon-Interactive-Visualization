@@ -1,6 +1,6 @@
 // Prototype of the final graphic: animated bubble scatter.
-//   x = GDP per capita (log), y = selectable metric, size = population, color = region
-//   Interactions: year slider + play, y-metric dropdown, region highlight dropdown, tooltips,
+//   x = GDP per capita (log), y = CO₂ per capita (log), size = population, color = region
+//   Interactions: year slider + play, region highlight dropdown, tooltips,
 //   color by region or income group, and pinned country trails (click a bubble or pick a country).
 // Axis domains are fixed across ALL years so motion over time is honest.
 import { LATEST_YEAR, REGIONS, regionColor, INCOME_GROUPS, incomeColor, frame, legend, tooltip, fmt } from "./common.js";
@@ -10,14 +10,11 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const METRICS = {
   co2_pc:    { label: "CO₂ per capita (tonnes)",                 log: true,  f: fmt.tons },
-  life_exp:  { label: "Life expectancy at birth (years)",        log: false, f: (v) => `${fmt.num(v)} yrs` },
-  energy_pc: { label: "Energy use per capita (kg oil eq.)",      log: true,  f: (v) => `${d3.format(",.0f")(v)} kg` },
-  renew_pct: { label: "Renewable share of energy use (%)",       log: false, f: fmt.pct },
 };
 
 export function draw(data) {
   // state.region is the highlight filter: a region, or an income group when coloring by income.
-  const state = { year: 2000, metric: "co2_pc", region: "all", country: "", colorBy: "region", pinned: [], trend: false, timer: null };
+  const state = { year: 1960, metric: "co2_pc", region: "all", country: "", colorBy: "region", pinned: ["USA", "CHN", "FRA"], trend: false, timer: null };
   const groupsFor = () => (state.colorBy === "income" ? INCOME_GROUPS : REGIONS);
   const groupOf = (d) => (state.colorBy === "income" ? d.income : d.region);
   const colorOf = (d) => (state.colorBy === "income" ? incomeColor(d.income) : regionColor(d.region));
@@ -28,8 +25,6 @@ export function draw(data) {
   const yearOut = d3.select("#year-value");
   const playBtn = d3.select("#play-btn");
 
-  d3.select("#metric-select").selectAll("option").data(Object.entries(METRICS)).join("option")
-    .attr("value", ([k]) => k).text(([, m]) => m.label);
   function fillHighlightOptions() {
     d3.select("#region-select").selectAll("option").data(["all", ...groupsFor()]).join("option")
       .attr("value", (d) => d)
@@ -44,7 +39,6 @@ export function draw(data) {
     .data([...new Set(data.map((d) => d.country))].sort()).join("option").attr("value", (d) => d);
 
   slider.on("input", function () { stop(); state.year = +this.value; update(250); });
-  d3.select("#metric-select").on("change", function () { state.metric = this.value; build(); });
   d3.select("#region-select").on("change", function () { state.region = this.value; highlight(); });
   d3.select("#country-search").on("input", function () { state.country = this.value.trim().toLowerCase(); highlight(); });
   // Picking an exact country name (Enter or the autocomplete list) pins its trail.
@@ -70,12 +64,13 @@ export function draw(data) {
   });
   playBtn.on("click", () => (state.timer ? stop() : play()));   // existing line
   playBtn.on("click", () => (state.timer ? stop() : play()));
-  d3.select("#reset-zoom-btn").on("click", () =>
+  // Reset zoom sits over the chart and only shows while zoomed in.
+  const resetBtn = d3.select("#reset-zoom-btn").on("click", () =>
     svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
 
   function play() {
     if (state.year >= years[1]) state.year = years[0];
-    playBtn.text("Pause");
+    playBtn.text("Pause").classed("playing", true);
     state.timer = d3.interval(() => {
       if (state.year >= years[1]) return stop();
       state.year += 1;
@@ -86,7 +81,7 @@ export function draw(data) {
   function stop() {
     state.timer?.stop();
     state.timer = null;
-    playBtn.text("Play");
+    playBtn.text("Play").classed("playing", false);
   }
 
   // --- chart ----------------------------------------------------------------
@@ -128,6 +123,7 @@ export function draw(data) {
       .extent([[0, 0], [width, height]])
       .translateExtent([[0, 0], [width, height]])
       .on("zoom", ({ transform }) => {
+        resetBtn.classed("visible", transform.k !== 1);
         zx = transform.rescaleX(x);
         zy = transform.rescaleY(y);
         gridSel.call(d3.axisLeft(zy).ticks(6, m.log ? "~g" : undefined).tickSize(-width).tickFormat(""));
@@ -140,8 +136,28 @@ export function draw(data) {
         drawTrend(trendLayer, trendCurve, zx, zy, 0);
       });
     svg.call(zoom);
+    resetBtn.classed("visible", false);
 
+    buildSizeLegend();
     update(0);
+  }
+
+  // Nested reference circles for the population size scale.
+  function buildSizeLegend() {
+    const sizes = [[1e9, "1B"], [1e8, "100M"], [1e7, "10M"]];
+    const R = r(sizes[0][0]);
+    const base = 2 * R + 8; // circles sit on this baseline; the padding above keeps the top label unclipped
+    const top = (d) => base - 2 * r(d[0]);
+    const el = d3.select("#proto .size-legend").html("");
+    el.append("span").attr("class", "size-legend-title").text("Population");
+    const s = el.append("svg").attr("width", 2 * R + 48).attr("height", base + 2);
+    const item = s.selectAll("g").data(sizes).join("g");
+    item.append("circle")
+      .attr("cx", R + 1).attr("cy", (d) => base - r(d[0])).attr("r", (d) => r(d[0]));
+    item.append("line")
+      .attr("x1", R + 1).attr("x2", 2 * R + 8).attr("y1", top).attr("y2", top);
+    item.append("text")
+      .attr("x", 2 * R + 11).attr("y", top).attr("dy", "0.35em").text((d) => d[1]);
   }
 
   function update(duration) {
@@ -152,8 +168,6 @@ export function draw(data) {
     const rows = data
       .filter((d) => d.year === state.year && d.gdp_pc > 0 && d[state.metric] != null && (!m.log || d[state.metric] > 0))
       .sort((a, b) => b.pop - a.pop);
-
-    d3.select("#proto .stat").text(`${state.year}: ${rows.length} countries with data`);
 
     dotsLayer.selectAll("circle")
       .data(rows, (d) => d.code) // key by country so bubbles move instead of re-binding

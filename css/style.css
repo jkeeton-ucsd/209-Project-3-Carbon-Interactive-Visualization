@@ -56,6 +56,8 @@ nav a:hover { text-decoration: underline; }
 }
 .card.featured { border-color: var(--accent); }
 .section-title { margin: 40px 0 0; }
+.collapsible > summary { cursor: pointer; margin: 40px 0 16px; }
+.collapsible > summary .section-title { display: inline; }
 h2, h3 { margin: 0 0 4px; line-height: 1.25; }
 .subtitle { margin: 0 0 12px; color: var(--text-secondary); font-size: 14px; }
 .notes { margin: 12px 0 0; font-size: 14px; color: var(--text-secondary); }
@@ -68,12 +70,102 @@ h2, h3 { margin: 0 0 4px; line-height: 1.25; }
 .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 8px 0 12px; font-size: 14px; }
 .controls label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
 .slider input { width: min(320px, 50vw); }
+/* Secondary controls: quiet pill inputs on a soft strip, so Play stays the focal point. */
+.controls.secondary {
+  gap: 8px 16px; margin-top: -2px; padding: 8px 12px; font-size: 13px;
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent); border-radius: 12px;
+}
+.controls.secondary label { color: var(--text-muted); gap: 6px; }
+.controls.secondary select,
+.controls.secondary input[type="search"],
+.controls.secondary button {
+  height: 30px; padding: 0 12px; font-size: 13px; color: var(--text-primary);
+  background-color: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .04);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.controls.secondary select:hover,
+.controls.secondary input[type="search"]:hover,
+.controls.secondary button:hover { border-color: var(--axis); }
+.controls.secondary :is(select, input, button):focus-visible {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+/* Custom chevron drawn with two gradients so it follows the theme colors */
+.controls.secondary select {
+  appearance: none; -webkit-appearance: none; padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%;
+  background-size: 5px 5px; background-repeat: no-repeat;
+}
+.controls.secondary input[type="search"] { width: 170px; }
+.controls.secondary button { color: var(--text-secondary); }
+/* Trend line checkbox as a small toggle switch */
+.controls.secondary input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; position: relative; margin: 0; cursor: pointer;
+  width: 30px; height: 18px; border-radius: 999px; background: var(--axis);
+  transition: background .15s ease;
+}
+.controls.secondary input[type="checkbox"]::before {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: transform .15s ease;
+}
+.controls.secondary input[type="checkbox"]:checked { background: var(--accent); }
+.controls.secondary input[type="checkbox"]:checked::before { transform: translateX(12px); }
+.controls.secondary input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+@media (prefers-reduced-motion: reduce) {
+  .controls.secondary input[type="checkbox"], .controls.secondary input[type="checkbox"]::before { transition: none; }
+}
+
+/* Legend row above the chart: color legend on the left, size key on the right */
+.legend-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; margin: 4px 0 24px; }
+.legend-row .legend { margin-top: 0; flex: 1 1 360px; }
+.size-legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+.size-legend circle { fill: none; stroke: var(--text-muted); }
+.size-legend line { stroke: var(--axis); stroke-dasharray: 2 2; }
+.size-legend text { fill: var(--text-muted); font-size: 11px; }
+.size-legend-title { padding-bottom: 2px; }
+
+/* Reset zoom floats in the chart's top-right corner while zoomed */
+.chart-wrap { position: relative; }
+#reset-zoom-btn { position: absolute; top: 4px; right: 4px; display: none; font-size: 13px; padding: 3px 10px; box-shadow: 0 1px 4px rgb(0 0 0 / .1); }
+#reset-zoom-btn.visible { display: block; }
+.chart-notes { margin: 6px 0 0; font-size: 12px; color: var(--text-muted); }
 output { font-variant-numeric: tabular-nums; min-width: 4ch; font-weight: 600; color: var(--text-primary); }
 button, select {
   font: inherit; color: var(--text-primary); background: var(--surface);
   border: 1px solid var(--axis); border-radius: 6px; padding: 5px 12px; cursor: pointer;
 }
 button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Play button: cool gradient with a soft pulse while idle, warm "heating up" gradient while playing. */
+#play-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 18px; border: none; border-radius: 999px;
+  font-weight: 600; letter-spacing: .02em; color: #fff;
+  background: linear-gradient(135deg, var(--series-1), var(--series-7));
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--series-7) 40%, transparent);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  animation: play-pulse 2.4s ease-in-out infinite;
+}
+#play-btn::before { content: "▶"; font-size: .8em; }
+#play-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+#play-btn:active { transform: translateY(0); }
+#play-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#play-btn.playing {
+  background: linear-gradient(135deg, var(--series-4), var(--series-2), var(--series-8));
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--series-8) 45%, transparent);
+  animation: none;
+}
+#play-btn.playing::before { content: "❚❚"; letter-spacing: -.15em; }
+@keyframes play-pulse {
+  0%, 100% { box-shadow: 0 2px 10px color-mix(in srgb, var(--series-7) 40%, transparent); }
+  50% { box-shadow: 0 2px 10px color-mix(in srgb, var(--series-7) 40%, transparent),
+                    0 0 0 6px color-mix(in srgb, var(--series-1) 18%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { #play-btn { animation: none; } }
 
 /* Chart chrome */
 .chart { width: 100%; }

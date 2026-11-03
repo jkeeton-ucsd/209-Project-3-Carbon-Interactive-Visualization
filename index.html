@@ -9,19 +9,14 @@
 </head>
 <body>
   <header>
-    <p class="eyebrow">Project 3 · Checkpoint</p>
+    <p class="eyebrow">Project 3 · Interactive Visualization</p>
     <h1>Do countries emit more CO₂ per person as they get richer and does that relationship
       change over time?</h1>
     <p class="lede">World Bank indicators for ~210 countries, 1960-2018.</p>
     <p class="team">Team: <span>The Chart Toppers</span> - Aidan Sanchez, Anirudh Sai, Jack Keeton</p>
     <nav>
       <a href="#proto">Prototype</a>
-      <a href="#ex1">1 · Wealth vs CO₂</a>
-      <a href="#ex2">2 · Income-group trends</a>
-      <a href="#ex3">3 · Top emitters</a>
-      <a href="#ex4">4 · Wealth vs life expectancy</a>
-      <a href="#ex5">5 · Country trajectories</a>
-      <a href="#ex6">6 · U.S. vs China</a>
+      <a href="#explore">Exploratory graphs</a>
       <a href="#data">Data</a>
       <a href="#writeup">Write-up</a>
     </nav>
@@ -30,14 +25,14 @@
   <main>
     <!-- ============ PROTOTYPE OF FINAL GRAPHIC ============ -->
     <section id="proto" class="card featured">
-      <h2>Work in progress: wealth vs. emissions over time</h2>
-      <p class="subtitle">Each bubble is a country, sized by population and colored by World Bank region.
-        Axes are fixed across all years. Countries missing a value in a given year are hidden for that year.</p>
+      <h2>Wealth vs. Emissions Over Time</h2>
+      <p class="subtitle">Each bubble is a country, sized by population and colored by World Bank region or income group.
+        Log scales on both axes.</p>
       <div class="controls">
         <button id="play-btn" type="button">Play</button>
-        <button id="reset-zoom-btn" type="button">Reset zoom</button>
         <label class="slider">Year <input id="year-slider" type="range" step="1"> <output id="year-value"></output></label>
-        <label>Y axis <select id="metric-select"></select></label>
+      </div>
+      <div class="controls secondary">
         <label>Highlight <select id="region-select"></select></label>
         <label>Color by <select id="color-select"><option value="region">Region</option><option value="income">Income group</option></select></label>
         <label>Find <input id="country-search" type="search" list="country-list" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
@@ -45,13 +40,22 @@
         <button id="clear-trails-btn" type="button">Clear trails</button>
         <label><input id="trend-toggle" type="checkbox"> Trend line</label>
       </div>
-      <div class="chart"></div>
-      <div class="legend"></div>
-      <p class="stat"></p>
+      <div class="legend-row">
+        <div class="legend"></div>
+        <div class="size-legend" role="img" aria-label="Bubble size shows population: 10 million, 100 million, 1 billion"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart"></div>
+        <button id="reset-zoom-btn" type="button">Reset zoom</button>
+      </div>
       <p class="stat trail-note"></p>
+      <p class="chart-notes">Notes: GDP per capita in constant 2010 US$; CO₂ in tonnes per person. Countries only
+        (regional and income aggregates removed). 1960-2018, the last year with CO₂ data. Axes are fixed across all
+        years; countries missing a value in a given year are hidden for that year.</p>
     </section>
 
-    <h2 class="section-title">Exploratory graphs</h2>
+    <details id="explore" class="collapsible">
+    <summary><h2 class="section-title">Exploratory graphs</h2></summary>
 
     <section id="ex1" class="card">
       <h3>1 · Richer countries emit more CO₂ per person</h3>
@@ -131,9 +135,11 @@
       States post-2005, and if you look at per-capita the reverse is true. Focusing on just two countries may be limiting
       as a visualization but the interpretation is very simple.</p>
     </section>
+    </details>
 
-    <section id="data" class="card prose">
-      <h2>Data &amp; transformations</h2>
+    <details id="data" class="collapsible">
+    <summary><h2 class="section-title">Data &amp; transformations</h2></summary>
+    <section class="card prose">
       <p>Source: World Bank World Development Indicators, via
         <a href="https://github.com/light-and-salt/World-Bank-Data-by-Indicators">light-and-salt/World-Bank-Data-by-Indicators</a>.
         <code>scripts/prepare_data.py</code> builds <code>data/wb_clean.csv</code>:</p>
@@ -144,6 +150,7 @@
         <li>CO₂ data ends in 2018, so charts stop there.</li>
       </ul>
     </section>
+    </details>
 
     <section id="writeup" class="card prose">
       <h2>Write-up</h2>
@@ -227,9 +234,16 @@
           population, because we're interested in country to country comparisons.
         </li>
         <li>
-          <b>Tooltips, zoom/pan and search.</b> 
+          <b>Pinned trails and default year.</b> 
+          Trails are pinned by default for the U.S., China, and France. These three countries were chosen because they are 
+          recognizable to most audiences, and they represent different regions. The default year is 1960, the first year of our data,
+          so that the user can see the full animation of emissions over time.
+        </li>
+        <li>
+          <b>Tooltips, zoom/pan, legend, and search.</b> 
           Hovering shows exact values in a tooltip, while zoom/pan help with the dense clusters of countries where
-          bubbles may overlap.
+          bubbles may overlap. The legend shows the "Color by" categories, and how bubble size corresponds to population. 
+          The search bar allows the user to find a specific country, highlight it, and add a trail.
         </li>
       </ul>
  
