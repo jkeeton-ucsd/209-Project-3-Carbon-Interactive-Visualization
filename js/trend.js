@@ -116,7 +116,7 @@ export function drawTrend(layer, curve, x, y, duration = 0) {
         .attr("fill", "var(--text-muted)")
         .attr("font-size", 11)
         .style("pointer-events", "none")
-        .text("trend")
+        .text("Global Trend")
         .attr("x", (d) => x(d.x)).attr("y", (d) => y(d.y)),
       (update) => update,
       (exit) => exit.remove(),
