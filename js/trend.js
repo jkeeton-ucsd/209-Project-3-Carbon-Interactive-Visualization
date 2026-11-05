@@ -106,13 +106,15 @@ export function drawTrend(layer, curve, x, y, duration = 0) {
     .attr("opacity", 0.6)
     .attr("d", line);
 
-  // Small label at the right end so the line is named, not just a mystery dash.
+  // Small label just past the right end so the line is named, not just a mystery dash.
+  // The layer is clipped to the plot, so when the line ends near the right edge the
+  // label tucks above the end instead.
   const last = pts.at(-1);
+  const roomRight = (d) => x.range()[1] - x(d.x) > 80;
   layer.selectAll("text.trend-label")
     .data(last ? [last] : [])
     .join(
       (enter) => enter.append("text").attr("class", "trend-label")
-        .attr("text-anchor", "end").attr("dy", "-0.6em")
         .attr("fill", "var(--text-muted)")
         .attr("font-size", 11)
         .style("pointer-events", "none")
@@ -121,6 +123,9 @@ export function drawTrend(layer, curve, x, y, duration = 0) {
       (update) => update,
       (exit) => exit.remove(),
     )
+    .attr("text-anchor", (d) => (roomRight(d) ? "start" : "end"))
+    .attr("dx", (d) => (roomRight(d) ? 6 : 0))
+    .attr("dy", (d) => (roomRight(d) ? "0.35em" : "-0.6em"))
     .transition().duration(duration).ease(d3.easeLinear)
     .attr("x", (d) => x(d.x))
     .attr("y", (d) => y(d.y));
