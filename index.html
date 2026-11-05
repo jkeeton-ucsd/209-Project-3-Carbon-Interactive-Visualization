@@ -37,8 +37,12 @@
         <label>Color by <select id="color-select"><option value="region">Region</option><option value="income">Income group</option></select></label>
         <label>Find <input id="country-search" type="search" list="country-list" placeholder="Country name…" aria-label="Search for a country to highlight"></label>
         <datalist id="country-list"></datalist>
-        <button id="clear-trails-btn" type="button">Clear trails</button>
         <label><input id="trend-toggle" type="checkbox"> Trend line</label>
+      </div>
+      <div class="pin-tray" hidden>
+        <span class="pin-tray-label">Trails</span>
+        <ul class="pin-chips" aria-label="Countries with trails"></ul>
+        <button id="clear-trails-btn" type="button">Clear trails</button>
       </div>
       <div class="legend-row">
         <div class="legend"></div>

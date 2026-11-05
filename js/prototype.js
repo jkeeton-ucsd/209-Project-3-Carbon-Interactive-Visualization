@@ -229,9 +229,29 @@ export function draw(data) {
       return { code, country: any.country, color: colorOf(any), rows };
     });
     drawTrails(trailsLayer, series, zx, zy, state.metric, duration);
+    renderPinTray(series);
     d3.select("#proto .trail-note").text(state.pinned.length
-      ? `Trails: ${series.map((s) => s.country).join(", ")}. Click a bubble again to remove it.`
+      ? "Click a bubble, or pick a country in Find, to add its trail."
       : "Tip: click a bubble, or pick a country in Find, to draw its path over time.");
+  }
+
+  // Holding area above the chart: one chip per pinned country, each with a remove button.
+  // Hidden (along with Clear trails) when nothing is pinned.
+  function renderPinTray(series) {
+    d3.select("#proto .pin-tray").property("hidden", !series.length);
+    d3.select("#proto .pin-chips").selectAll("li")
+      .data(series, (s) => s.code)
+      .join((enter) => {
+        const li = enter.append("li").attr("class", "pin-chip");
+        li.append("i").attr("class", "swatch");
+        li.append("span").attr("class", "pin-chip-name");
+        li.append("button").attr("type", "button").attr("class", "pin-chip-remove").text("×")
+          .on("click", (_, s) => togglePin(s.code));
+        return li;
+      })
+      .style("--chip", (s) => s.color)
+      .call((li) => li.select(".pin-chip-name").text((s) => s.country))
+      .call((li) => li.select(".pin-chip-remove").attr("aria-label", (s) => `Remove ${s.country}`));
   }
 
   function highlight() {

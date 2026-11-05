@@ -119,9 +119,39 @@ h2, h3 { margin: 0 0 4px; line-height: 1.25; }
   .controls.secondary input[type="checkbox"], .controls.secondary input[type="checkbox"]::before { transition: none; }
 }
 
+/* Holding area for pinned trails: chips on the left, Clear trails on the far right */
+.pin-tray {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+  margin: 8px 0 0; padding: 6px 8px 6px 12px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: 12px;
+}
+.pin-tray[hidden] { display: none; }
+.pin-tray-label { color: var(--text-muted); }
+.pin-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pin-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 10px; font-size: 12px;
+  color: var(--text-primary); border-radius: 999px;
+  background: color-mix(in srgb, var(--chip) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--chip) 35%, transparent);
+}
+.pin-chip .swatch { margin: 0; background: var(--chip); }
+.pin-chip-remove {
+  display: inline-grid; place-items: center; width: 18px; height: 18px; padding: 0;
+  font-size: 14px; line-height: 1; color: var(--text-muted);
+  background: transparent; border: none; border-radius: 50%;
+}
+.pin-chip-remove:hover { color: var(--text-primary); background: color-mix(in srgb, var(--chip) 25%, transparent); }
+.pin-chip-remove:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#clear-trails-btn {
+  margin-left: auto; height: 26px; padding: 0 10px; font-size: 13px;
+  color: var(--text-secondary); background: transparent; border: none; border-radius: 999px;
+}
+#clear-trails-btn:hover { color: var(--text-primary); background: color-mix(in srgb, var(--text-primary) 6%, transparent); }
+#clear-trails-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 /* Legend row above the chart: color legend on the left, size key on the right */
 .legend-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; margin: 4px 0 24px; }
-.legend-row .legend { margin-top: 0; flex: 1 1 360px; }
+.legend-row .legend { margin-top: 0; flex: 1 1 360px; font-size: 12px; }
 .size-legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
 .size-legend circle { fill: none; stroke: var(--text-muted); }
 .size-legend line { stroke: var(--axis); stroke-dasharray: 2 2; }
